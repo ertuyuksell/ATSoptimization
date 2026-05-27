@@ -1,4 +1,4 @@
-# ResumeIQ
+# ATSoptimization
 
 Yapay zekâ destekli CV analizi ve ATS (Applicant Tracking System) skorlama platformu. Kullanıcının yüklediği bir özgeçmişi otomatik olarak okur, Türkçe ve İngilizce bölümleri tanır, yetenekleri çıkarır, önceden eğitilmiş bir sınıflandırma modeli ile uygun iş rolünü tahmin eder ve sonuçları animasyonlu bir analitik panelinde sunar.
 
