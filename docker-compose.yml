@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: resumedb
+      POSTGRES_USER: resume
+      POSTGRES_PASSWORD: resume
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resume -d resumedb"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8000
+      MODEL_PATH: models/job_role_classifier.pkl
+      API_KEY: ${AI_SERVICE_KEY:-change-me-internal-key}
+    volumes:
+      - ./ai-service/models:/app/models:ro
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: jdbc:postgresql://postgres:5432/resumedb
+      DB_USER: resume
+      DB_PASSWORD: resume
+      JWT_SECRET: ${JWT_SECRET:-change-me-very-long-random-secret-change-me-very-long}
+      AI_SERVICE_URL: http://ai-service:8000
+      AI_SERVICE_KEY: ${AI_SERVICE_KEY:-change-me-internal-key}
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "8081:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5174:80"
+
+volumes:
+  pgdata:
+  uploads:

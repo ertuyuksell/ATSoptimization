@@ -1,0 +1,29 @@
+# Env / secrets
+.env
+.env.local
+**/.env
+
+# Python
+ai-service/.venv/
+ai-service/__pycache__/
+**/*.pyc
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Java
+backend/target/
+backend/.mvn/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+backend/uploads/
